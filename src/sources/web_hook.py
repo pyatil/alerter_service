@@ -1,16 +1,17 @@
 from aiohttp import web
+from BaseClasses import Source
+from Model import Notification
 
 
-def get_handler(notification_queue, notification_creater):
-    async def new_notification(request):
+class WebHook(Source):
+
+    async def web_hook_handler(self, request):
         data = await request.json()
-        await notification_queue.put(notification_creater(**data))
+        await self.notification_queue.put(Notification(**data))
         print("Notification has been added")
         return web.Response()
-    return new_notification
 
-
-def notification_source(notification_queue, notification_creater):
-    app = web.Application()
-    app.router.add_post("/notifications", get_handler(notification_queue, notification_creater))
-    return app
+    def get_routers(self):
+        return [
+            ("/notifications", self.web_hook_handler)
+        ]

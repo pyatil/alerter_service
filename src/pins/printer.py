@@ -1,4 +1,10 @@
+import asyncio
+from BaseClasses import Pin
 
 
-async def notification_subscriber(notification):
-    print(notification)
+class PrinterPin(Pin):
+    PIN_TYPE = "print"
+
+    async def notify(self, notification):
+        await asyncio.sleep(0.1)
+        print(notification)
