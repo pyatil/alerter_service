@@ -24,5 +24,5 @@ class Manager(object):
 
 class Pin(object):
 
-    def notify(self, notification):
+    def notify(self, notification, subscriber):
         pass
