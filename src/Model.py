@@ -35,7 +35,8 @@ Subscriber = namedtuple("Subscriber", ["pin_id", "pin_type", "source_intresting"
 
 class Subscribers(object):
     def __init__(self):
-        self.subscribers = set(tuple(elem) for elem in get_persistent_data(SUBSCRIBER_FILE, set()))
+        subscribers = get_persistent_data(SUBSCRIBER_FILE, set())
+        self.subscribers = set(Subscriber(*elem) for elem in subscribers)
 
     async def add(self, subscriber):
         self.subscribers.add(subscriber)
