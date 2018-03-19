@@ -21,6 +21,7 @@ class TelegramManager(Manager):
             subscriber = Subscriber(chat.id, PIN_TYPE, "deploy", None, None)
             print("(telegram) subscribe", subscriber)
             await self.subscribers.add(subscriber)
+            return chat.reply("You have been subscribed successfully")
         return subscribe
 
     def loop(self):
