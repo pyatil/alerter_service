@@ -1,4 +1,4 @@
 aiodns==1.1.1
 aiohttp==3.0.9
-aiofiles-0.3.2
+aiofiles==0.3.2
 aiotg==0.9.8

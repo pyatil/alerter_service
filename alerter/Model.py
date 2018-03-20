@@ -2,9 +2,9 @@ import os
 import json
 import aiofiles
 from collections import namedtuple
+from alerter.config import DATA_PATH
 
-PERSISTENT_DIR = os.path.dirname(__file__)
-SUBSCRIBER_FILE = os.path.join(PERSISTENT_DIR, "subscribers.json")
+SUBSCRIBER_FILE = os.path.join(DATA_PATH, "subscribers.json")
 
 
 def get_persistent_data(path_data, default=None):
