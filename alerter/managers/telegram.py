@@ -1,7 +1,7 @@
 from aiotg import Bot, Chat
-from config import TELEGRAM_TOKEN
-from Model import Subscriber
-from BaseClasses import Manager
+from alerter.config import TELEGRAM_TOKEN
+from alerter.Model import Subscriber
+from alerter.BaseClasses import Manager
 
 PIN_TYPE = "telegram"
 

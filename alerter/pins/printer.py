@@ -1,5 +1,5 @@
 import asyncio
-from BaseClasses import Pin
+from alerter.BaseClasses import Pin
 
 
 class PrinterPin(Pin):

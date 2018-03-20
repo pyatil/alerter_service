@@ -1,6 +1,6 @@
 from aiohttp import web
-from BaseClasses import Source
-from Model import Notification
+from alerter.BaseClasses import Source
+from alerter.Model import Notification
 
 
 class WebHook(Source):

@@ -1,7 +1,7 @@
 # import asyncio
 from aiotg import Bot
-from BaseClasses import Pin
-from config import TELEGRAM_TOKEN
+from alerter.BaseClasses import Pin
+from alerter.config import TELEGRAM_TOKEN
 
 
 bot = Bot(api_token=TELEGRAM_TOKEN)

@@ -1,13 +1,13 @@
 import asyncio
-import Alerter
-from config import WEB_PORT
-from Model import subscribers
-from Queues import NOTIFICATION_QUEUE
+from alerter import Alerter
+from alerter.config import WEB_PORT
+from alerter.Model import subscribers
+from alerter.Queues import NOTIFICATION_QUEUE
 
-from sources.web_hook import WebHook
-from pins.printer import PrinterPin
-from pins.telegram import TelegramPin
-from managers.telegram import TelegramManager
+from alerter.sources.web_hook import WebHook
+from alerter.pins.printer import PrinterPin
+from alerter.pins.telegram import TelegramPin
+from alerter.managers.telegram import TelegramManager
 
 
 Alerter.register_manager(TelegramManager(subscribers))
@@ -28,7 +28,7 @@ async def alerter():
             await asyncio.gather(*tasks)
 
 
-async def main(loop):
+async def get_tasks(loop):
     app = Alerter.create_web()
     server = loop.create_server(app.make_handler(), '127.0.0.1', WEB_PORT)
     tasks = []
@@ -40,7 +40,11 @@ async def main(loop):
     # await asyncio.wait(tasks)
 
 
-if __name__ == '__main__':
+def main():
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
+    loop.run_until_complete(get_tasks(loop))
     loop.run_forever()
+
+
+if __name__ == '__main__':
+    main()
