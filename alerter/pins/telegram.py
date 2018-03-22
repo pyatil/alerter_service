@@ -11,5 +11,5 @@ class TelegramPin(Pin):
     PIN_TYPE = "telegram"
 
     async def notify(self, notification, subscriber):
-        await bot.send_message(subscriber.pin_id, "%s" % notification.data)
+        await bot.send_message(subscriber.user_id, "%s" % notification.data)
         print("(telegram) massage has been sent", notification)

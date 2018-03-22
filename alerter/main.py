@@ -1,7 +1,8 @@
+import re
 import asyncio
 from alerter import Alerter
 from alerter.config import WEB_PORT
-from alerter.Model import subscribers
+from alerter.Subscribers import subscribers
 from alerter.Queues import NOTIFICATION_QUEUE
 
 from alerter.sources.web_hook import WebHook
@@ -20,10 +21,12 @@ async def alerter():
     while True:
         notification = await NOTIFICATION_QUEUE.get()
         tasks = []
-        for subscriber in subscribers:
-            handler = Alerter.get_pin_handler_by_type(subscriber.pin_type).notify
-            task = handler(notification, subscriber)
-            tasks.append(task)
+        for user_id, subs in subscribers:
+            for sub in subs:
+                if re.match(sub.regex, notification.data):
+                    handler = Alerter.get_pin_handler_by_type(sub.pin_type).notify
+                    task = handler(notification, sub)
+                    tasks.append(task)
         if tasks:
             await asyncio.gather(*tasks)
 
