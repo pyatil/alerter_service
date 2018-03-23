@@ -40,7 +40,6 @@ async def get_tasks(loop):
     tasks.extend(Alerter.get_tasks(loop))
     tasks = asyncio.gather(*tasks)
     await tasks
-    # await asyncio.wait(tasks)
 
 
 def main():

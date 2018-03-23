@@ -1,10 +1,16 @@
 import os
 import json
 import aiofiles
-from collections import namedtuple
 from alerter.config import DATA_PATH
 
 SUBSCRIBER_FILE = os.path.join(DATA_PATH, "subscribers.json")
+
+
+def to_json(obj):
+    if hasattr(obj, "to_json"):
+        return obj.to_json()
+    else:
+        return json.dumps(obj)
 
 
 def get_persistent_data(path_data, default=None):
@@ -17,11 +23,25 @@ def get_persistent_data(path_data, default=None):
 
 async def persist_data(path_data, data):
     async with aiofiles.open(path_data, 'w') as fp:
-        data = json.dumps(data)
+        data = json.dumps(data, default=to_json)
         await fp.write(data)
 
 
-Subscriber = namedtuple("Subscriber", ["user_id", "pin_type", "source_intresting", "level_info", "regex"])
+class Subscriber(object):
+
+    def __init__(self, user_id, pin_type, source_intresting, level_info, regex):
+        self.user_id = str(user_id)
+        self.pin_type = pin_type
+        self.source_intresting = source_intresting
+        self.level_info = level_info
+        self.regex = regex
+        self._tuple = (self.user_id, self.pin_type, self.source_intresting, self.level_info, self.regex)
+
+    def to_json(self):
+        return json.dumps(self._tuple)
+
+    def __iter__(self):
+        return iter(self._tuple)
 
 
 class FileSubscribers(object):
@@ -35,6 +55,16 @@ class FileSubscribers(object):
         else:
             self.subscribers[subscriber.user_id].append(subscriber)
         await persist_data(SUBSCRIBER_FILE, self.subscribers)
+
+    async def remove(self, user_id, sub_idx):
+        subs = self.subscribers.get(str(user_id), [])
+        sub = subs.pop(sub_idx)
+        await persist_data(SUBSCRIBER_FILE, self.subscribers)
+        return sub.regex
+
+    async def get_subs(self, user_id):
+        subs = self.subscribers.get(str(user_id), [])
+        return subs
 
     def __iter__(self):
         return iter(self.subscribers.items())
