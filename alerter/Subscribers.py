@@ -1,6 +1,7 @@
 import os
 import json
 import aiofiles
+from contextlib import suppress
 from alerter.config import DATA_PATH
 
 SUBSCRIBER_FILE = os.path.join(DATA_PATH, "subscribers.json")
@@ -14,6 +15,8 @@ def to_json(obj):
 
 
 def get_persistent_data(path_data, default=None):
+    with suppress(FileExistsError):
+        os.mkdir(os.path.dirname(SUBSCRIBER_FILE))
     try:
         with open(path_data) as fp:
             return json.load(fp)
@@ -62,7 +65,7 @@ class FileSubscribers(object):
         await persist_data(SUBSCRIBER_FILE, self.subscribers)
         return sub.regex
 
-    async def get_subs(self, user_id):
+    async def get_subscriptions(self, user_id):
         subs = self.subscribers.get(str(user_id), [])
         return subs
 
