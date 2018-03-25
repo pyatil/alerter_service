@@ -1,3 +1,4 @@
+import re
 import asyncio
 from aiohttp import web
 
@@ -33,7 +34,21 @@ def create_web():
     return app
 
 
-def get_tasks(loop):
+async def notification_loop(notification_queue, subscribers):
+    while True:
+        notification = await notification_queue.get()
+        tasks = []
+        for user_id, subs in subscribers:
+            for sub in subs:
+                if re.match(sub.regex, notification.data):
+                    handler = get_pin_handler_by_type(sub.pin_type).notify
+                    task = handler(notification, sub)
+                    tasks.append(task)
+        if tasks:
+            await asyncio.gather(*tasks)
+
+
+def get_tasks():
     tasks = []
     for resource in managers + sources:
         loop = resource.loop()
