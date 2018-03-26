@@ -38,13 +38,9 @@ class Subscriber(object):
         self.source_intresting = source_intresting
         self.level_info = level_info
         self.regex = regex
-        self._tuple = (self.user_id, self.pin_type, self.source_intresting, self.level_info, self.regex)
 
     def to_json(self):
-        return json.dumps(self._tuple)
-
-    def __iter__(self):
-        return iter(self._tuple)
+        return [self.user_id, self.pin_type, self.source_intresting, self.level_info, self.regex]
 
 
 class FileSubscribers(object):
@@ -74,3 +70,8 @@ class FileSubscribers(object):
 
 
 subscribers = FileSubscribers()
+
+
+if __name__ == '__main__':
+    from helpers import run
+    run(subscribers.add(Subscriber("1", "1", "1", "1", "1")))
