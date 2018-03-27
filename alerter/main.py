@@ -9,8 +9,9 @@ from alerter.pins.printer import PrinterPin
 from alerter.pins.telegram import TelegramPin
 from alerter.managers.telegram import TelegramManager
 
+source_types = ["deploy"]
 
-Alerter.register_manager(TelegramManager(subscribers))
+Alerter.register_manager(TelegramManager(subscribers, source_types))
 Alerter.register_pin(PrinterPin())
 Alerter.register_pin(TelegramPin())
 Alerter.register_source(WebHook(NOTIFICATION_QUEUE))
