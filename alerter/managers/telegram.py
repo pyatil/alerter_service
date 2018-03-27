@@ -17,25 +17,31 @@ assert TELEGRAM_TOKEN
 bot = Bot(api_token=TELEGRAM_TOKEN)
 
 
-def button(source_type, callback_name):
+def inl_button(text, callback_name):
     return {
         'type': 'InlineKeyboardButton',
-        'text': source_type,
-        'callback_data': '%s-%s' % (callback_name, source_type),
+        'text': text,
+        'callback_data': '%s' % (callback_name),
     }
 
 
 def get_subscribe_markup(source_types, callback_name):
     return {
         'type': 'ReplyKeyboardMarkup',
-        'inline_keyboard': [[button(source_type, callback_name)] for source_type in source_types]
+        'inline_keyboard': [
+            [inl_button(source_type, '%s-%s' % (callback_name, source_type))]
+            for source_type in source_types
+        ]
     }
 
 
 def get_subscriptions_markup(subscriptions, callback_name):
     return {
         'type': 'ReplyKeyboardMarkup',
-        'inline_keyboard': [[button(subscription, callback_name)] for subscription in subscriptions]
+        'inline_keyboard': [
+            [inl_button("unsubscribe from '%s'" % sub.regex, '%s-%s' % (callback_name, i))]
+            for i, sub in enumerate(subscriptions)
+        ]
     }
 
 
@@ -75,26 +81,26 @@ class TelegramManager(Manager):
             source_type = ".*" if choosed_source_type == "any" else choosed_source_type
             subscriber = Subscriber(chat.id, PIN_TYPE, source_type, None, regex)
             await self.subscribers.add(subscriber)
-            return chat.edit_text(sended_message_id, "You have been subscribed '%s' successfully" % regex)
-
-        @bot.command(r"/unsubscribe.(\d+)")
-        async def unsubscribe(chat: Chat, match):
-            # print("(telegram)", match.group(1))
-            sub_idx = int(match.group(1).strip())
-            # print("(telegram) unsubscribe", chat.id, sub_idx)
-            regex = await self.subscribers.remove(chat.id, sub_idx)
-            return chat.send_text("You have been unsubscribed '%s' successfully" % regex)
+            return chat.edit_text(sended_message_id, "You have been subscribed '%s' from source '%s'" % (regex, source_type))
 
         @bot.command(r"/subscriptions")
         async def subscriptions(chat: Chat, match):
             subs = await self.subscribers.get_subscriptions(chat.id)
             # print("(telegram)", subs)
-            TEMPLATE = "'{1}'\n/unsubscribe_{0}"
-            if subs:
-                msg = "\n\n".join([TEMPLATE.format(i, sub.regex) for i, sub in enumerate(subs)])
-            else:
-                msg = "You don't have subscriptions"
-            return chat.send_text(msg)
+            if not subs:
+                return chat.send_text("You dont have subscriptions")
+            queue = Queue()
+            rnd_name = str(uuid4())
+            hook = get_hook(queue)
+            bot.add_callback(rnd_name + "-(.*)", hook)
+            markup = get_subscriptions_markup(subs, rnd_name)
+            sended_msg = await chat.send_text("Subscriptions:", reply_markup=json.dumps(markup))
+            sended_message_id = sended_msg['result']['message_id']
+            nmatch = await queue.get()
+            choosed_id = int(nmatch.group(1))
+            removed_sub = await self.subscribers.remove(chat.id, choosed_id)
+            msg = "Unsubscribed from '%s'" % removed_sub
+            return chat.edit_text(sended_message_id, msg)
 
         @bot.default
         async def default(chat: Chat, message):
